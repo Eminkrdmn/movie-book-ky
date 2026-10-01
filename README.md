@@ -42,7 +42,7 @@ Bu proje, temel React bilgisini (component yapısı, props, state, routing, API'
 Gereksinimler: Node.js (LTS veya üzeri) ve bir TMDB API key.
 
 ```bash
-git clone [repo-adresi]
+git clone [https://github.com/Eminkrdmn/movie-book-ky]
 cd movie-book-ky
 npm install
 ```
