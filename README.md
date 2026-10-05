@@ -1,3 +1,5 @@
+**Canlı demo:** https://movie-book-ky.vercel.app/
+
 # Movie Book 🎬
 
 TMDB API kullanan, React ile geliştirilmiş bir film rehberi uygulamasıdır. Popüler filmleri listeler, film aramaya izin verir, film detaylarını gösterir ve favori filmleri tarayıcıda saklar.
