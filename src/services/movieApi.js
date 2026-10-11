@@ -1,21 +1,19 @@
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-const BASE_URL =
-  import.meta.env.VITE_TMDB_BASE_URL || "https://api.themoviedb.org/3";
+const API_URL = "/api/tmdb";
+const ACCOUNT_ID = import.meta.env.VITE_TMDB_ACCOUNT_ID;
 const IMAGE_URL =
   import.meta.env.VITE_TMDB_IMAGE_URL || "https://image.tmdb.org/t/p/w500";
 
-async function request(endpoint, params = {}) {
-  if (!API_KEY) {
-    throw new Error("TMDB API anahtarı tanımlı değil (VITE_TMDB_API_KEY).");
-  }
-
+async function request(endpoint, { method = "GET", params = {}, body } = {}) {
   const query = new URLSearchParams({
-    api_key: API_KEY,
-    language: "tr-TR",
+    ...(method === "GET" && { language: "tr-TR" }),
     ...params,
   });
 
-  const response = await fetch(`${BASE_URL}${endpoint}?${query}`);
+  const response = await fetch(`${API_URL}${endpoint}?${query}`, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
   if (!response.ok) {
     throw new Error(`Film servisi isteği başarısız oldu (${response.status}).`);
@@ -25,12 +23,14 @@ async function request(endpoint, params = {}) {
 }
 
 export async function getPopularMovies(page = 1) {
-  const data = await request("/movie/popular", { page });
+  const data = await request("/movie/popular", { params: { page } });
   return data.results;
 }
 
 export async function searchMovies(searchText, page = 1) {
-  const data = await request("/search/movie", { query: searchText, page });
+  const data = await request("/search/movie", {
+    params: { query: searchText, page },
+  });
   return data.results;
 }
 
@@ -40,4 +40,23 @@ export function getMovieDetails(id) {
 
 export function getPosterUrl(posterPath) {
   return posterPath ? `${IMAGE_URL}${posterPath}` : null;
+}
+
+export async function getFavorites() {
+  const data = await request(`/account/${ACCOUNT_ID}/favorite/movies`);
+  return data.results;
+}
+
+export function addFavorite(movieId) {
+  return request(`/account/${ACCOUNT_ID}/favorite`, {
+    method: "POST",
+    body: { media_type: "movie", media_id: movieId, favorite: true },
+  });
+}
+
+export function removeFavorite(movieId) {
+  return request(`/account/${ACCOUNT_ID}/favorite`, {
+    method: "POST",
+    body: { media_type: "movie", media_id: movieId, favorite: false },
+  });
 }
