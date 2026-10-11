@@ -3,13 +3,17 @@ const BASE_URL = "https://api.themoviedb.org/3";
 export default async function handler(req, res) {
   const token = process.env.TMDB_ACCESS_TOKEN;
   const sessionId = process.env.TMDB_SESSION_ID;
-  const accountId = process.env.VITE_TMDB_ACCOUNT_ID;
+  const accountId = String(process.env.VITE_TMDB_ACCOUNT_ID || "").trim();
 
   if (!token || !sessionId || !accountId) {
     return res.status(500).json({ error: "Sunucu ayarları eksik." });
   }
 
-  const path = [].concat(req.query.path || []).join("/");
+  const { path: rawPath = "", ...rest } = req.query;
+  const path = []
+    .concat(rawPath)
+    .join("/")
+    .replace(/^\/+|\/+$/g, "");
 
   // Sadece uygulamanın kullandığı istekler geçer
   const routes = [
@@ -28,11 +32,10 @@ export default async function handler(req, res) {
   );
 
   if (!allowed) {
-    return res.status(404).json({ error: "Bulunamadı." });
+    return res.status(404).json({ error: "Bulunamadı.", path });
   }
 
-  const query = new URLSearchParams(req.query);
-  query.delete("path");
+  const query = new URLSearchParams(rest);
   if (path.startsWith("account/")) {
     query.set("session_id", sessionId);
   }
